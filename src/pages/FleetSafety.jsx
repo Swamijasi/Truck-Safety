@@ -1,21 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { FaShieldAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import axios from "axios";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const FleetSafety = () => {
-  const redTrucks = 214;
-  const yellowTrucks = 886;
-  const greenTrucks = 2718;
-  const totalTrucks = redTrucks + yellowTrucks + greenTrucks;
+  const [truckCounts, setTruckCounts] = useState({
+    red: 0,
+    yellow: 0,
+    green: 0,
+  });
+
+  useEffect(() => {
+    axios
+      .get("/api/TruckController/GetTruckStatusCounts")
+      .then((res) => {
+        const data = res.data;
+        setTruckCounts({
+          red: data.redCount || 0,
+          yellow: data.yellowCount || 0,
+          green: data.greenCount || 0,
+        });
+      })
+      .catch((err) => {
+        console.error("Error fetching truck status:", err);
+      });
+  }, []);
+
+  const totalTrucks = truckCounts.red + truckCounts.yellow + truckCounts.green;
 
   const pieData = {
     labels: ["Red", "Yellow", "Green"],
     datasets: [
       {
-        data: [redTrucks, yellowTrucks, greenTrucks],
+        data: [truckCounts.red, truckCounts.yellow, truckCounts.green],
         backgroundColor: ["#EF4444", "#FACC15", "#22C55E"],
         borderWidth: 1,
       },
@@ -34,7 +54,7 @@ const FleetSafety = () => {
           <div className="relative bg-white border-l-4 border-red-500 p-6 rounded-lg shadow hover:shadow-lg hover:scale-[1.02] transition-transform duration-300">
             <FaExclamationTriangle className="absolute top-4 right-4 text-red-500 text-xl" />
             <h3 className="text-gray-800 font-semibold text-sm">Critical Risk</h3>
-            <div className="text-red-600 text-4xl font-bold mt-2">{redTrucks}</div>
+            <div className="text-red-600 text-4xl font-bold mt-2">{truckCounts.red}</div>
             <p className="text-gray-800 mt-2 text-sm">Red Trucks</p>
             <p className="text-gray-600 mt-1 text-sm">Open Critical Risk NGs &gt; 7 Days</p>
           </div>
@@ -43,7 +63,7 @@ const FleetSafety = () => {
           <div className="relative bg-white border-l-4 border-yellow-400 p-6 rounded-lg shadow hover:shadow-lg hover:scale-[1.02] transition-transform duration-300">
             <FaShieldAlt className="absolute top-4 right-4 text-yellow-500 text-xl" />
             <h3 className="text-gray-800 font-semibold text-sm">Moderate Risk</h3>
-            <div className="text-yellow-500 text-4xl font-bold mt-2">{yellowTrucks}</div>
+            <div className="text-yellow-500 text-4xl font-bold mt-2">{truckCounts.yellow}</div>
             <p className="text-gray-800 mt-2 text-sm">Yellow Trucks</p>
             <p className="text-gray-600 mt-1 text-sm">Open Medium Risk NGs &gt; 14 Days</p>
           </div>
@@ -52,7 +72,7 @@ const FleetSafety = () => {
           <div className="relative bg-white border-l-4 border-green-500 p-6 rounded-lg shadow hover:shadow-lg hover:scale-[1.02] transition-transform duration-300">
             <FaCheckCircle className="absolute top-4 right-4 text-green-500 text-xl" />
             <h3 className="text-gray-800 font-semibold text-sm">Safe</h3>
-            <div className="text-green-600 text-4xl font-bold mt-2">{greenTrucks}</div>
+            <div className="text-green-600 text-4xl font-bold mt-2">{truckCounts.green}</div>
             <p className="text-gray-800 mt-2 text-sm">Green Trucks</p>
             <p className="text-gray-600 mt-1 text-sm whitespace-normal leading-snug">
               No Open NGs or Closed Within 15 Days
@@ -80,5 +100,3 @@ const FleetSafety = () => {
 };
 
 export default FleetSafety;
-
-
