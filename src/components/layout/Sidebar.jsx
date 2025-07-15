@@ -172,7 +172,9 @@ import logo from "../../assets/maruti.png.jpg";
             </div>
             <div className="space-y-2">
               {navItems.map((item) => {
-                const isActive = currentPath === item.path;
+                const isActive =
+                (currentPath === "/" && item.path === "/fleet-safety") || currentPath === item.path;
+
 
                 return (
                   <Link key={item.path} to={item.path}>
@@ -204,3 +206,4 @@ import logo from "../../assets/maruti.png.jpg";
 };
 
 export default Sidebar;
+
